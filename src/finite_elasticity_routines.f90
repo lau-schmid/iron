@@ -3598,10 +3598,10 @@ CONTAINS
 
 !      CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       LWORK=MIN(LWMAX,INT(WORK(1)))
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       EVECTOR_1=C_e(:,1)
       EVECTOR_2=C_e(:,2)
       EVECTOR_3=C_e(:,3)
@@ -3658,10 +3658,10 @@ CONTAINS
 !         FREE_ENERGY=1.0_DP/2.0_DP*(I_1e-3.0_DP)
 !         CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           LWORK=MIN(LWMAX,INT(WORK(1)))
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           EVECTOR_1=C_e(:,1)
           EVECTOR_2=C_e(:,2)
           EVECTOR_3=C_e(:,3)
@@ -3692,7 +3692,7 @@ CONTAINS
 
           VALUE=XB_ENERGY_PER_VOLUME-(FREE_ENERGY-FREE_ENERGY_0)
 
-          IF (VALUE.GE.0) THEN
+          IF (VALUE .GE. 0.0_DP) THEN
             UP=lambda_a
           ELSE
             LOW=lambda_a
@@ -3733,10 +3733,10 @@ CONTAINS
 !         FREE_ENERGY=1.0_DP/2.0_DP*(I_1e-3.0_DP)
 !         CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           LWORK=MIN(LWMAX,INT(WORK(1)))
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           EVECTOR_1=C_e(:,1)
           EVECTOR_2=C_e(:,2)
           EVECTOR_3=C_e(:,3)
@@ -3785,10 +3785,10 @@ CONTAINS
 !      CALL Eigenvector(C_e,EVALUES(3),EVECTOR_3,ERR,ERROR,*999)
 !      CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
 !      CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-!      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+!      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
 !      LWORK=MIN(LWMAX,INT(WORK(1)))
 !      CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-!      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+!      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
 !      EVECTOR_1=C_e(:,1)
 !      EVECTOR_2=C_e(:,2)
 !      EVECTOR_3=C_e(:,3)
@@ -3889,12 +3889,8 @@ CONTAINS
 !      velo=velo*5.0e-2_DP
 !      velo=velo*5.0e-7_DP 
 
-      NULLIFY(FIELD_VARIABLE)
-      CALL FIELD_VARIABLE_GET(DEPENDENT_FIELD,FIELD_U1_VARIABLE_TYPE,FIELD_VARIABLE,ERR,ERROR,*999)
-      dof_idx=FIELD_VARIABLE%COMPONENTS(2)%PARAM_TO_DOF_MAP%GAUSS_POINT_PARAM2DOF_MAP%GAUSS_POINTS(GAUSS_POINT_NUMBER, &
-        & ELEMENT_NUMBER)
-      CALL DISTRIBUTED_VECTOR_VALUES_SET(FIELD_VARIABLE%PARAMETER_SETS%SET_TYPE(FIELD_VALUES_SET_TYPE)%PTR%PARAMETERS,dof_idx, &
-        & velo,ERR,ERROR,*999)
+      CALL FIELD_PARAMETER_SET_UPDATE_GAUSS_POINT(DEPENDENT_FIELD,FIELD_U1_VARIABLE_TYPE,FIELD_VALUES_SET_TYPE,GAUSS_POINT_NUMBER, &
+        & ELEMENT_NUMBER,2,velo,ERR,ERROR,*999)
 
       
       !--------------------------------------------------------------------------------------------
@@ -3955,14 +3951,14 @@ CONTAINS
       CALL MATRIX_PRODUCT(DZDNU,F_a_inv,F_e,ERR,ERROR,*999)
       CALL MATRIX_TRANSPOSE(F_e,F_e_T,ERR,ERROR,*999)
       CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
-      
+
       !Odgen law - 3 terms. Material Parameters C = [mu(1) mu(2) mu(3) alpha(1) alpha(2) alpha(3) mu_0]
 !      CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       LWORK=MIN(LWMAX,INT(WORK(1)))
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       EVECTOR_1=C_e(:,1)
       EVECTOR_2=C_e(:,2)
       EVECTOR_3=C_e(:,3)
@@ -4001,6 +3997,8 @@ CONTAINS
       TOL1=TOL 
       UP=lambda_a
       LOW=0.001_DP
+      
+!      WRITE(*,*) "VALUE: ", VALUE
 
       DO WHILE (ABS(VALUE).GE.TOL)
 
@@ -4009,6 +4007,13 @@ CONTAINS
           lambda_a=UP-(UP-LOW)/2.0_DP
 
           F_a_inv=0.0_DP
+          IF(lambda_a<TOL) THEN
+           CALL FlagWarning("lambda_a is close to zero",ERR,ERROR,*999)
+!            WRITE(*,*) "UP: ", UP
+!            WRITE(*,*) "LOW: ", LOW
+!            WRITE(*,*) "lambda_a: ", lambda_a
+            lambda_a=lambda_a+TOL
+          ENDIF
           F_a_inv(1,1)=1.0_DP/lambda_a
           F_a_inv(2,2)=1.0_DP
           F_a_inv(3,3)=1.0_DP
@@ -4018,10 +4023,10 @@ CONTAINS
           CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
 
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           LWORK=MIN(LWMAX,INT(WORK(1)))
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           EVECTOR_1=C_e(:,1)
           EVECTOR_2=C_e(:,2)
           EVECTOR_3=C_e(:,3)
@@ -4091,10 +4096,10 @@ CONTAINS
           CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
 
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           LWORK=MIN(LWMAX,INT(WORK(1)))
           CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-          IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+          IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
           EVECTOR_1=C_e(:,1)
           EVECTOR_2=C_e(:,2)
           EVECTOR_3=C_e(:,3)
@@ -4137,13 +4142,10 @@ CONTAINS
       PIOLA_TENSOR=PIOLA_TENSOR*C(7)+2.0_DP*P*AZU
       
       !store lambda_f, so it can be used in the CellML file
-      NULLIFY(FIELD_VARIABLE)
-      CALL FIELD_VARIABLE_GET(DEPENDENT_FIELD,FIELD_U1_VARIABLE_TYPE,FIELD_VARIABLE,ERR,ERROR,*999)
-      dof_idx=FIELD_VARIABLE%COMPONENTS(1)%PARAM_TO_DOF_MAP%GAUSS_POINT_PARAM2DOF_MAP%GAUSS_POINTS(GAUSS_POINT_NUMBER, &
-        & ELEMENT_NUMBER)
       lambda_f=SQRT(AZL(1,1))
-      CALL DISTRIBUTED_VECTOR_VALUES_SET(FIELD_VARIABLE%PARAMETER_SETS%SET_TYPE(FIELD_VALUES_SET_TYPE)%PTR%PARAMETERS,dof_idx, &
-        & lambda_f,ERR,ERROR,*999)
+      CALL FIELD_PARAMETER_SET_UPDATE_GAUSS_POINT(DEPENDENT_FIELD,FIELD_U1_VARIABLE_TYPE,FIELD_VALUES_SET_TYPE,GAUSS_POINT_NUMBER, &
+        & ELEMENT_NUMBER,1,lambda_f,ERR,ERROR,*999)
+
 
     CASE(EQUATIONS_SET_1D3D_MONODOMAIN_ACTIVE_STRAIN_SUBTYPE)
 
@@ -4169,10 +4171,10 @@ CONTAINS
       !Odgen law - 3 terms. Material Parameters C = [mu(1) mu(2) mu(3) alpha(1) alpha(2) alpha(3) mu_0]
 !      CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       LWORK=MIN(LWMAX,INT(WORK(1)))
       CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-      IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+      IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
       EVECTOR_1=C_e(:,1)
       EVECTOR_2=C_e(:,2)
       EVECTOR_3=C_e(:,3)
@@ -8524,6 +8526,9 @@ CONTAINS
             SELECT CASE(PROBLEM_SUBTYPE)
             CASE(PROBLEM_FINITE_ELASTICITY_WITH_GROWTH_CELLML_SUBTYPE)
               CALL SOLVERS_SOLVER_GET(SOLVERS,2,SOLVER,ERR,ERROR,*999)
+            ELSE
+              CALL SOLVERS_SOLVER_GET(SOLVERS,1,SOLVER,ERR,ERROR,*999)
+            ENDIF
             CALL SOLVER_SOLVER_EQUATIONS_GET(SOLVER,SOLVER_EQUATIONS,ERR,ERROR,*999)
             !Finish the solver equations creation
             CALL SOLVER_EQUATIONS_CREATE_FINISH(SOLVER_EQUATIONS,ERR,ERROR,*999)
@@ -9785,10 +9790,10 @@ CONTAINS
                 !Odgen law - 3 terms. Material Parameters C = [mu(1) mu(2) mu(3) alpha(1) alpha(2) alpha(3) mu_0]
                 !CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
                 CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-                IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                 LWORK=MIN(LWMAX,INT(WORK(1)))
                 CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-                IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                 EVECTOR_1=C_e(:,1)
                 EVECTOR_2=C_e(:,2)
                 EVECTOR_3=C_e(:,3)
@@ -9844,10 +9849,10 @@ CONTAINS
                     CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
 
                     CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-                    IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                     LWORK=MIN(LWMAX,INT(WORK(1)))
                     CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-                    IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                     EVECTOR_1=C_e(:,1)
                     EVECTOR_2=C_e(:,2)
                     EVECTOR_3=C_e(:,3)
@@ -9918,10 +9923,10 @@ CONTAINS
                     CALL MATRIX_PRODUCT(F_e_T,F_e,C_e,ERR,ERROR,*999)
 
                     CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,-1,ERR)
-                    IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                     LWORK=MIN(LWMAX,INT(WORK(1)))
                     CALL DSYEV('V','U',3,C_e,3,EVALUES,WORK,LWORK,ERR)
-                    IF(ERR.NE.0) WRITE(*,*) "Error in Eigenvalue computation"
+                    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
                     EVECTOR_1=C_e(:,1)
                     EVECTOR_2=C_e(:,2)
                     EVECTOR_3=C_e(:,3)
@@ -10526,6 +10531,7 @@ CONTAINS
       dfdJfact = 0.0_DP
     END IF
 
+
     EXITS("EVALUATE_CHAPELLE_FUNCTION")
     RETURN
 999 ERRORSEXITS("EVALUATE_CHAPELLE_FUNCTION",ERR,ERROR)
@@ -10596,6 +10602,7 @@ CONTAINS
         & '(17X,3(X,E13.6))',ERR,ERROR,*999)
     ENDIF
 
+
     EXITS("EVALUATE_CHAPELLE_PIOLA_TENSOR_ADDITION")
     RETURN
 999 ERRORSEXITS("EVALUATE_CHAPELLE_PIOLA_TENSOR_ADDITION",ERR,ERROR)
@@ -10619,12 +10626,14 @@ CONTAINS
     
     ENTERS("GET_DARCY_FINITE_ELASTICITY_PARAMETERS",ERR,ERROR,*999)
 
+
 !   DARCY_RHO_0_F = 1.0E-03_DP
     DARCY_RHO_0_F = 1.0_DP
 !   Mfact = 2.18E05_DP
     Mfact = 2.18E00_DP
     bfact = 1.0_DP
     p0fact = 0.0_DP
+
 
     EXITS("GET_DARCY_FINITE_ELASTICITY_PARAMETERS")
     RETURN
