@@ -4323,13 +4323,13 @@ CONTAINS
         IF(activation.LT.0.0_DP) activation=0.0_DP
 
 		    ! parameter to switch on and off actin-titin interaction
-        activation=C(6)*activation
+        activation=C(7)*activation
 
         ! normalized Titin-stress -> weighted sum of bound and unbound titin-stress
         TITIN_VALUE=activation*TITIN_BOUND+(1.0_DP-activation)*TITIN_UNBOUND
     	  !TITIN_VALUE=activation*TITIN_BOUND*0.5_DP+(1.0_DP-activation)*TITIN_UNBOUND !TK Hack
         ! divide by lambda and multiply by P_max
-        TITIN_VALUE=TITIN_VALUE/SQRT(AZL(1,1))*C(5)
+        TITIN_VALUE=TITIN_VALUE/SQRT(AZL(1,1))*C(6)
           
         PIOLA_TENSOR(1,1)=PIOLA_TENSOR(1,1)+TITIN_VALUE
 
@@ -4347,10 +4347,10 @@ CONTAINS
         ! normalized XF-Titin-stress -> weighted sum of bound and unbound XF-titin-stress
         TITIN_VALUE_CROSS_FIBRE=activation*TITIN_BOUND_CROSS_FIBRE+(1.0_DP-activation)*TITIN_UNBOUND_CROSS_FIBRE
         ! divide by lambda and multiply by P_max
-        TITIN_VALUE_CROSS_FIBRE=TITIN_VALUE_CROSS_FIBRE*C(5) !/SQRT(AZL(1,1))
+        TITIN_VALUE_CROSS_FIBRE=TITIN_VALUE_CROSS_FIBRE*C(6) !/SQRT(AZL(1,1))
  
-        PIOLA_TENSOR(2,2)=PIOLA_TENSOR(2,2)+TITIN_VALUE_CROSS_FIBRE
-        PIOLA_TENSOR(3,3)=PIOLA_TENSOR(3,3)+TITIN_VALUE_CROSS_FIBRE
+        !PIOLA_TENSOR(2,2)=PIOLA_TENSOR(2,2)+TITIN_VALUE_CROSS_FIBRE
+        !PIOLA_TENSOR(3,3)=PIOLA_TENSOR(3,3)+TITIN_VALUE_CROSS_FIBRE
 
       CASE(EQUATIONS_SET_MONODOMAIN_ELASTICITY_VELOCITY_SUBTYPE)
         !passive anisotropic stiffness -- only in the tension range
@@ -7599,7 +7599,7 @@ CONTAINS
               CASE(EQUATIONS_SET_1D3D_MONODOMAIN_ELASTICITY_SUBTYPE,EQUATIONS_SET_MONODOMAIN_ELASTICITY_VELOCITY_SUBTYPE)
                 NUMBER_OF_COMPONENTS=5;
               CASE(EQUATIONS_SET_MONODOMAIN_ELASTICITY_W_TITIN_SUBTYPE)
-                NUMBER_OF_COMPONENTS=6;
+                NUMBER_OF_COMPONENTS=7;
               CASE(EQUATIONS_SET_1D3D_MONODOMAIN_ACTIVE_STRAIN_SUBTYPE)
                 NUMBER_OF_COMPONENTS=8;
               CASE(EQUATIONS_SET_MEMBRANE_SUBTYPE)
