@@ -4355,8 +4355,36 @@ CONTAINS
 
 
       CASE(EQUATIONS_SET_MONODOMAIN_ELASTICITY_MUSCLE_TENDON_SUBTYPE)
-        ! Here the passive stress tensor needs to be implemented (PK2-stresses) TODO
-        
+        ! Here the passive stress tensor needs to be implemented (PK2-stresses) TODO Implement Material Law
+		      
+		    !Odgen law - 1 term. Material Parameters C = [mu alpha]
+	!      CALL Eigenvalue(C_e,EVALUES,ERR,ERROR,*999)
+		    CALL DSYEV('V','U',3,AZL,3,EVALUES,WORK,-1,ERR)
+		    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
+		    LWORK=MIN(LWMAX,INT(WORK(1)))
+		    CALL DSYEV('V','U',3,AZL,3,EVALUES,WORK,LWORK,ERR)
+		    IF(ERR.NE.0) CALL FlagError("Error in Eigenvalue computation",ERR,ERROR,*999)
+		    EVECTOR_1=AZL(:,1)
+		    EVECTOR_2=AZL(:,2)
+		    EVECTOR_3=AZL(:,3)
+
+		    DO i=1,3
+		      DO j=1,3
+		        EMATRIX_1(i,j)=EVECTOR_1(i)*EVECTOR_1(j)
+		        EMATRIX_2(i,j)=EVECTOR_2(i)*EVECTOR_2(j)
+		        EMATRIX_3(i,j)=EVECTOR_3(i)*EVECTOR_3(j)
+		      END DO
+		    END DO
+
+		    PIOLA_TENSOR=0.0_DP
+		    PIOLA_TENSOR=PIOLA_TENSOR+ &
+		    	& EVALUES(1)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_1+ &
+		      & EVALUES(2)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_2+ &
+		      & EVALUES(3)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_3
+		    PIOLA_TENSOR=PIOLA_TENSOR*C(1)-1.0_DP*P*AZU
+
+!bis hier neu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         !active stress component
         CALL FIELD_VARIABLE_GET(EQUATIONS_SET%INDEPENDENT%INDEPENDENT_FIELD,FIELD_U_VARIABLE_TYPE,FIELD_VARIABLE,ERR,ERROR,*999)
         dof_idx=FIELD_VARIABLE%COMPONENTS(1)%PARAM_TO_DOF_MAP%GAUSS_POINT_PARAM2DOF_MAP%GAUSS_POINTS(GAUSS_POINT_NUMBER, &
