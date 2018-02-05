@@ -4231,7 +4231,7 @@ CONTAINS
 						& EVALUES(1)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_1+ &
 						& EVALUES(2)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_2+ &
 						& EVALUES(3)**(C(2)/2.0_DP-1.0_DP)*EMATRIX_3
-					PIOLA_TENSOR=PIOLA_TENSOR*C(1)+1.0_DP*P*AZU
+					PIOLA_TENSOR=PIOLA_TENSOR*C(1)-1.0_DP*P*AZU
 
 !bis hier neu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
